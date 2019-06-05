@@ -13,7 +13,7 @@ struct element {
 };
 
 Element* nameMap[MAX_VERTEX_COUNT];
-int nameMapCount;
+int nameMapCount = 0;
 
 typedef struct listNode {
   Element* element;
@@ -32,7 +32,7 @@ struct matrixGraph {
 
 struct listGraph {
   int vertexCount;
-  List** adjacency;
+  List* adjacency[MAX_VERTEX_COUNT];
 };
 
 int** createMatrix(int size) {
@@ -44,22 +44,17 @@ int** createMatrix(int size) {
 };
 
 List* createList(int size) {
-  int i;
   List* l = (List*) malloc(sizeof(List) * size);
-  for (i = 0; i < size; i++) {
-    l[i].head = NULL;
-    l[i].tail = NULL;
-  }
+  l->head = NULL;
+  l->tail = NULL;
   return l;
 }
 
-List** createAdjacencyList(int size) {
+void createAdjacencyList(ListGraph* graph, int size) {
   int i;
-  List** adjacency = (List**) malloc(sizeof(List) * MAX_VERTEX_COUNT);
   for (i = 0; i < MAX_VERTEX_COUNT; i++) {
-    adjacency[i] = createList(size);
+    graph->adjacency[i] = createList(size);
   }
-  return adjacency;
 }
 
 int compareElements(Element* source, Element* match) {
@@ -75,7 +70,7 @@ int compareElements(Element* source, Element* match) {
 
 int findEdgePositionByElement (Element* element) {
   int i;
-  for (i = 0; i < MAX_VERTEX_COUNT; i++) {
+  for (i = 0; i < nameMapCount; i++) {
     Element* e = nameMap[i];
     if (compareElements(e, element)) return i;
   }
@@ -116,8 +111,8 @@ Element* createElement(
 
 ListGraph* createListGraph(int vertexCount) {
   ListGraph* graph = (ListGraph*) malloc(sizeof(ListGraph));
-  graph->vertexCount= vertexCount;
-  graph->adjacency = createAdjacencyList(vertexCount);
+  graph->vertexCount = vertexCount;
+  createAdjacencyList(graph, vertexCount);
   return graph;
 }
 
@@ -130,14 +125,19 @@ ListNode* createListNode(Element* element) {
 
 void addToList(List* list, ListNode* listNode) {
   ListNode* current = list->head;
+  if (!current) {
+    list->head = listNode;
+    list->tail = listNode;
+    return;
+  }
   while(current->next) current = current->next;
   current->next = listNode;
   list->tail = listNode;
 }
 
-List* findElementInAdjacency(List** adjacency, Element* element) {
+List* findElementInAdjacency(List* adjacency[MAX_VERTEX_COUNT], Element* element) {
   int i;
-  for (i = 0; i <MAX_VERTEX_COUNT; i++) {
+  for (i = 0; i < nameMapCount; i++) {
     List* list = adjacency[i];
     if (list->head) {
       if (compareElements(list->head->element, element)) return list;
@@ -148,7 +148,7 @@ List* findElementInAdjacency(List** adjacency, Element* element) {
 
 ListNode* findElementInList(List* list, Element* element) {
   ListNode* current = list->head;
-  while(current->next) {
+  while(current) {
     if (compareElements(element, current->element)) return current;
     current = current->next;
   }
@@ -156,7 +156,7 @@ ListNode* findElementInList(List* list, Element* element) {
 }
 
 void addListGraphNode(ListGraph* graph, Element* element) {
-  if (findEdgePositionByElement(element) == -1) return;
+  if (findEdgePositionByElement(element) != -1) return;
   nameMap[nameMapCount] = element;
   addToList(graph->adjacency[nameMapCount], createListNode(element));
   nameMapCount++;
@@ -168,7 +168,7 @@ void addListGraphEdge(ListGraph* graph, Element* source, Element* destination) {
   if (!sourceList || !destinationList) return;
   // Não adiciona o memsmo elemento duas vezes
   if (!findElementInList(sourceList, destination)) addToList(sourceList, createListNode(destination));
-  if (!findElementInList(destinationList, source)) addToList(destinationList, createListNode(destination));
+  if (!findElementInList(destinationList, source)) addToList(destinationList, createListNode(source));
 }
 
 void addMatrixGraphEdge(MatrixGraph* graph, Element* source, Element* destination, int weight) {
@@ -199,4 +199,11 @@ int findMatrixGraphEdge(MatrixGraph* graph, Element* source, Element* destinatio
     destinationPosition == -1
   ) return 0;
   return graph->adjacency[sourcePosition][destinationPosition];
+}
+
+int findListGraphEdge(ListGraph* graph, Element* source, Element* destination) {
+  List* list = findElementInAdjacency(graph->adjacency, source);
+  int result = (int) findElementInList(list, destination);
+  if (result) return 1;
+  return 0;
 }
