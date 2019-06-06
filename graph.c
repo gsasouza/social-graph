@@ -3,11 +3,6 @@
 #include <stdlib.h>
 #include "graph.h"
 
-struct listGraph {
-  int vertexCount;
-  List* adjacency[MAX_VERTEX_COUNT];
-};
-
 int** createMatrix(int size) {
   int** matrix = malloc(sizeof(int*) * size);
   for (int i = 0; i < size; ++i) {

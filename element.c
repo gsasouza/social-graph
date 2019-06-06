@@ -1,6 +1,7 @@
-#include "element.h"
 #include <string.h>
 #include <stdlib.h>
+#include "element.h"
+#include "list.h"
 
 int getElementsSimilarity(Element* source, Element* match) {
   int similarity = 0;
@@ -17,14 +18,13 @@ int compareElements(Element* source, Element* match) {
   return getElementsSimilarity(source, match) == 6;
 }
 
-
 Element* createElement(
-    char name[100],
-    int age,
-    char city[100],
-    char favoriteMovie[100],
-    char team[100],
-    char favoriteColor[100]
+  char name[100],
+  int age,
+  char city[100],
+  char favoriteMovie[100],
+  char team[100],
+  char favoriteColor[100]
 ){
   Element* element = (Element*) malloc(sizeof(Element));
   strcpy(element->name, name);
@@ -33,5 +33,6 @@ Element* createElement(
   strcpy(element->favoriteMovie, favoriteMovie);
   strcpy(element->team, team);
   strcpy(element->favoriteColor, favoriteColor);
+  element->invites = (List*) malloc(sizeof(List));
   return element;
 }

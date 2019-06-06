@@ -30,25 +30,119 @@ void printMatrix(MatrixGraph* matrixGraph) {
   }
 }
 
+void printUsers(MatrixGraph* graph) {
+  int i;
+  for (i = 0; i < graph->vertexCount; i++) {
+    printf("%d - %s \n", i, graph->nodes[i]->name);
+  }
+}
+
+void printSelectedElement(MatrixGraph* graph, int selectedUser) {
+  Element* user = graph->nodes[selectedUser];
+  printf("Usuário Selecionado: %d - %s \n", selectedUser, user->name);
+}
+
+void printSeparator() {
+  printf("-----------------------------------\n");
+}
+
+void selectUser(MatrixGraph* matrixGraph, int* selectedUser) {
+  while(1){
+    printf("Escolha o usuário: ");
+    scanf("%d", selectedUser);
+    printf("%d", matrixGraph->vertexCount);
+    if ((*selectedUser) < 0 || (*selectedUser) > matrixGraph->vertexCount - 1) {
+      printf("Usuário Inválido, digite novamente \n");
+      continue;
+    }
+    return;
+  }
+}
+
+void waitForUser() {
+  printSeparator();
+  printf("Digite qualquer teclar para continuar ...");
+  getchar();
+  getchar();
+}
+
+void printUserFriends(ListGraph* listGraph, int* selectedUser) {
+  List* list = listGraph->adjacency[*selectedUser];
+  ListNode* user = list->head;
+  ListNode* friend = user->next;
+  if (!friend) {
+    printf("Esse usuário ainda não tem nenhum amigo :(\n");
+    return;
+  }
+  while (friend) {
+    printf(" - %s \n", friend->element->name);
+    friend = friend->next;
+  }
+}
+
+void printUserInvites(ListGraph* listGraph, int* selectedUser) {
+  List* list = listGraph->adjacency[*selectedUser];
+  ListNode* user = list->head;
+  List* invites = user->element->invites;
+  ListNode* invite = invites->head;
+  if (!invite) {
+    printf("Esse usuário ainda não tem nenhum convite :(\n");
+    return;
+  }
+  while (invite) {
+    printf(" - %s \n", invite->element->name);
+    invite = invite->next;
+  }
+}
 
 void menu(MatrixGraph* matrixGraph, ListGraph* listGraph) {
   int option = 0, selectedUser = 0;
-
   while(option >= 0 && option < 7){
+    printSeparator();
+    printSelectedElement(matrixGraph, selectedUser);
+    printSeparator();
     printf("***OPCOES***\n");
     printf("1. Listar Usuários Cadastrados\n");
-    printf("2. Imprimir Matriz de Relacionamentos\n");
+    printf("2. Trocar de Usuário\n");
+    printf("3. Meus Amigos\n");
+    printf("4. Meus Convites de Amizade\n");
+    printf("5. Enviar Convite de Amizade\n");
+    printf("6. Lista de Sugestões\n");
+    printf("7. Buscar Amor Verdadeiro\n");
+    printf("8. Amigos com pouca afinidade\n");
+    printf("9. Sair\n");
     printf("Sua opcao: ");
     scanf("%d",&option);
+    printSeparator();
     switch(option) {
+      case 1: {
+        printUsers(matrixGraph);
+        waitForUser();
+        break;
+      }
       case 2: {
-        printMatrix(matrixGraph);
+        selectUser(matrixGraph, &selectedUser);
+        break;
+      }
+      case 3: {
+        printUserFriends(listGraph, &selectedUser);
+        waitForUser();
+        break;
+      }
+      case 4: {
+        printUserInvites(listGraph, &selectedUser);
+        waitForUser();
+        break;
       }
       default:
+        printf("Opção Inválida \n");
         continue;
     }
+
   }
 }
+
+
 
 
 int main() {
