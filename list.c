@@ -31,13 +31,17 @@ ListNode* findElementInList(List* list, Element* element) {
 
 void removeElementFromList(List* list, Element* element) {
   ListNode* current = list->head;
-  ListNode* aux = current;
+  ListNode* aux = NULL;
+  if (!current->next) {
+    list->head = NULL;
+  }
   while(current) {
     if (compareElements(element, current->element)) {
-      aux->next = current->next;
+      aux = current;
+      current = current->next;
+      free(aux);
       return;
     }
-    aux = current;
     current = current->next;
   }
 }

@@ -58,7 +58,6 @@ void selectUser(MatrixGraph* matrixGraph, int* selectedUser) {
   while(1){
     printf("Escolha o usuário: ");
     scanf("%d", selectedUser);
-    printf("%d", matrixGraph->vertexCount);
     if ((*selectedUser) < 0 || (*selectedUser) > matrixGraph->vertexCount - 1) {
       printf("Usuário Inválido, digite novamente \n");
       continue;
@@ -94,19 +93,21 @@ void manageInvite(ListGraph* listGraph, int* selectedUser, int* count) {
   ListNode* user = list->head;
   List* invites = user->element->invites;
   ListNode* invite = invites->head;
-
   while(1) {
     printf("Selecione o convite: ");
     scanf("%d", &option);
-    if (option <= 0 || option > (*count) - 1) {
+    if (option < 0 || option > (*count)) {
       printf("Opção Inválida. \n");
+      continue;
     }
-    for(invite; invite->next != NULL; invite = invite->next){
-      if (*count == j) break;
-      j++;
-    }
-    removeElementFromList(invites, invite->element);
+    break;
   }
+  for(invite; invite->next != NULL; invite = invite->next){
+    if (*count == j) break;
+    j++;
+  }
+  addListGraphEdge(listGraph, user->element, invite->element);
+  removeElementFromList(invites, invite->element);
 }
 
 void printUserInvites(ListGraph* listGraph, MatrixGraph* matrixGraph, int* selectedUser) {
@@ -153,6 +154,7 @@ void sendInvite(ListGraph* listGraph, MatrixGraph* matrixGraph, int* selectedUse
 void menu(MatrixGraph* matrixGraph, ListGraph* listGraph) {
   int option = 0, selectedUser = 0;
   while(option >= 0 && option < 7){
+    setbuf(stdout, 0);
     printSeparator();
     printSelectedElement(matrixGraph, selectedUser);
     printSeparator();
@@ -191,7 +193,7 @@ void menu(MatrixGraph* matrixGraph, ListGraph* listGraph) {
       }
       case 5: {
         sendInvite(listGraph, matrixGraph, &selectedUser);
-        waitForUser();
+//        waitForUser();
         break;
       }
       case 9: return;
