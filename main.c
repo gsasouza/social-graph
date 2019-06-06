@@ -80,19 +80,50 @@ void printUserFriends(ListGraph* listGraph, int* selectedUser) {
   }
 }
 
+void manageInvite(ListGraph* listGraph, int* selectedUser, int* count) {
+  int option = 0, j = 0;
+  List* list = listGraph->adjacency[*selectedUser];
+  ListNode* user = list->head;
+  List* invites = user->element->invites;
+  ListNode* invite = invites->head;
+
+  while(1) {
+    printf("Selecione o convite: ");
+    scanf("%d", &option);
+    if (option < 0 || option > (*count) - 1) {
+      printf("Opção Inválida. \n");
+    }
+    for(invite; invite->next != NULL; invite = invite->next){
+      if (*count == j) break;
+      j++;
+    }
+    removeElementFromList(invites, invite->element);
+  }
+}
+
 void printUserInvites(ListGraph* listGraph, int* selectedUser) {
   List* list = listGraph->adjacency[*selectedUser];
   ListNode* user = list->head;
   List* invites = user->element->invites;
   ListNode* invite = invites->head;
+  int count = 0, option = 0;
   if (!invite) {
     printf("Esse usuário ainda não tem nenhum convite :(\n");
     return;
   }
-  while (invite) {
-    printf(" - %s \n", invite->element->name);
-    invite = invite->next;
+  for(ListNode* i = invite; i != NULL; i = i->next){
+    printf("%d - %s \n", count, invite->element->name);
+    count++;
   }
+  printf("Deseja aceitar ou recusar alguma solicitação? (1. Sim / 2.Não) \n");
+  scanf("%d", &option);
+  if (option == 1) {
+    manageInvite(listGraph, selectedUser, &count);
+  }
+}
+
+void sendInvite(ListGraph* listGraph, int* selectedUser) {
+
 }
 
 void menu(MatrixGraph* matrixGraph, ListGraph* listGraph) {
@@ -141,9 +172,6 @@ void menu(MatrixGraph* matrixGraph, ListGraph* listGraph) {
 
   }
 }
-
-
-
 
 int main() {
   MatrixGraph* matrixGraph = createMatrixGraph(20);

@@ -28,3 +28,16 @@ ListNode* findElementInList(List* list, Element* element) {
   }
   return NULL;
 }
+
+void removeElementFromList(List* list, Element* element) {
+  ListNode* current = list->head;
+  ListNode* aux = current;
+  while(current) {
+    if (compareElements(element, current->element)) {
+      aux->next = current->next;
+      return;
+    }
+    aux = current;
+    current = current->next;
+  }
+}
