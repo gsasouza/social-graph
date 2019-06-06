@@ -47,13 +47,6 @@ ListGraph* createListGraph(int vertexCount) {
   return graph;
 }
 
-ListNode* createListNode(Element* element) {
-  ListNode* listNode = (ListNode*) malloc(sizeof(ListNode));
-  listNode->element = element;
-  listNode->next = NULL;
-  return listNode;
-}
-
 List* findElementInAdjacency(List* adjacency[MAX_VERTEX_COUNT], Element* element) {
   int i;
   for (i = 0; i < MAX_VERTEX_COUNT; i++) {

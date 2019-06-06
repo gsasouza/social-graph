@@ -37,6 +37,14 @@ void printUsers(MatrixGraph* graph) {
   }
 }
 
+void printUsersWithSimilarity(MatrixGraph* graph, int* selectedUser) {
+  int i;
+  for (i = 0; i < graph->vertexCount; i++) {
+    if (i == *selectedUser) continue;
+    printf("%d - %s (Afinidade: %d%%) \n", i, graph->nodes[i]->name, graph->adjacency[*selectedUser][i] * 100 / 6);
+  }
+}
+
 void printSelectedElement(MatrixGraph* graph, int selectedUser) {
   Element* user = graph->nodes[selectedUser];
   printf("Usuário Selecionado: %d - %s \n", selectedUser, user->name);
@@ -90,7 +98,7 @@ void manageInvite(ListGraph* listGraph, int* selectedUser, int* count) {
   while(1) {
     printf("Selecione o convite: ");
     scanf("%d", &option);
-    if (option < 0 || option > (*count) - 1) {
+    if (option <= 0 || option > (*count) - 1) {
       printf("Opção Inválida. \n");
     }
     for(invite; invite->next != NULL; invite = invite->next){
@@ -101,7 +109,7 @@ void manageInvite(ListGraph* listGraph, int* selectedUser, int* count) {
   }
 }
 
-void printUserInvites(ListGraph* listGraph, int* selectedUser) {
+void printUserInvites(ListGraph* listGraph, MatrixGraph* matrixGraph, int* selectedUser) {
   List* list = listGraph->adjacency[*selectedUser];
   ListNode* user = list->head;
   List* invites = user->element->invites;
@@ -112,9 +120,11 @@ void printUserInvites(ListGraph* listGraph, int* selectedUser) {
     return;
   }
   for(ListNode* i = invite; i != NULL; i = i->next){
+    // @TODO display similarity
     printf("%d - %s \n", count, invite->element->name);
     count++;
   }
+  printSeparator();
   printf("Deseja aceitar ou recusar alguma solicitação? (1. Sim / 2.Não) \n");
   scanf("%d", &option);
   if (option == 1) {
@@ -122,8 +132,22 @@ void printUserInvites(ListGraph* listGraph, int* selectedUser) {
   }
 }
 
-void sendInvite(ListGraph* listGraph, int* selectedUser) {
-
+void sendInvite(ListGraph* listGraph, MatrixGraph* matrixGraph, int* selectedUser) {
+  int option = 0;
+  while(1) {
+    printSeparator();
+    printUsersWithSimilarity(matrixGraph, selectedUser);
+    printf("Selecione o usuário: ");
+    scanf("%d", &option);
+    if (option < 0 || option > matrixGraph->vertexCount - 1) {
+      printf("Opção Inválida. \n");
+    }
+    else break;
+  }
+  addToList(
+    listGraph->adjacency[option]->head->element->invites,
+    createListNode(listGraph->adjacency[*selectedUser]->head->element)
+  );
 }
 
 void menu(MatrixGraph* matrixGraph, ListGraph* listGraph) {
@@ -161,10 +185,16 @@ void menu(MatrixGraph* matrixGraph, ListGraph* listGraph) {
         break;
       }
       case 4: {
-        printUserInvites(listGraph, &selectedUser);
+        printUserInvites(listGraph, matrixGraph, &selectedUser);
         waitForUser();
         break;
       }
+      case 5: {
+        sendInvite(listGraph, matrixGraph, &selectedUser);
+        waitForUser();
+        break;
+      }
+      case 9: return;
       default:
         printf("Opção Inválida \n");
         continue;
@@ -173,6 +203,7 @@ void menu(MatrixGraph* matrixGraph, ListGraph* listGraph) {
   }
 }
 
+//@TODO test invite/accept/refuse friend flow
 int main() {
   MatrixGraph* matrixGraph = createMatrixGraph(20);
   ListGraph* listGraph = createListGraph(20);

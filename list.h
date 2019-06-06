@@ -1,7 +1,7 @@
+#include "element.h"
 #ifndef LIST_H
 #define LIST_H
 
-  typedef struct element Element;
 
   typedef struct listNode {
     Element* element;
@@ -17,4 +17,5 @@
   void addToList(List*, ListNode*);
   ListNode* findElementInList(List*, Element*);
   void removeElementFromList(List*, Element*);
+  ListNode* createListNode(Element* element);
 #endif

@@ -41,3 +41,10 @@ void removeElementFromList(List* list, Element* element) {
     current = current->next;
   }
 }
+
+ListNode* createListNode(Element* element) {
+  ListNode* listNode = (ListNode*) malloc(sizeof(ListNode));
+  listNode->element = element;
+  listNode->next = NULL;
+  return listNode;
+}
