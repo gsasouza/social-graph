@@ -3,18 +3,6 @@
 #include <stdlib.h>
 #include "graph.h"
 
-struct element {
-  char name[100];
-  int age;
-  char city[100];
-  char favoriteMovie[100];
-  char team[100];
-  char favoriteColor[100];
-};
-
-Element* nameMap[MAX_VERTEX_COUNT];
-int nameMapCount = 0;
-
 typedef struct listNode {
   Element* element;
   struct listNode* next;
@@ -24,11 +12,6 @@ typedef struct list {
   ListNode* head;
   ListNode* tail;
 } List;
-
-struct matrixGraph {
-  int vertexCount;
-  int** adjacency;
-};
 
 struct listGraph {
   int vertexCount;
@@ -57,21 +40,10 @@ void createAdjacencyList(ListGraph* graph, int size) {
   }
 }
 
-int compareElements(Element* source, Element* match) {
-  return (
-    !strcmp(source->name, match->name) &&
-    !strcmp(source->city, match->city) &&
-    !strcmp(source->favoriteMovie, match->favoriteMovie) &&
-    !strcmp(source->favoriteColor, match->favoriteColor) &&
-    !strcmp(source->team, match->team) &&
-    source->age == match->age
-  );
-}
-
-int findEdgePositionByElement (Element* element) {
+int findNodePositionByElement(MatrixGraph* graph, Element* element) {
   int i;
-  for (i = 0; i < nameMapCount; i++) {
-    Element* e = nameMap[i];
+  for (i = 0; i < graph->vertexCount; i++) {
+    Element* e = graph->nodes[i];
     if (compareElements(e, element)) return i;
   }
   return -1;
@@ -79,7 +51,7 @@ int findEdgePositionByElement (Element* element) {
 
 MatrixGraph* createMatrixGraph(int vertexCount) {
   MatrixGraph* graph = (MatrixGraph*) malloc(sizeof(MatrixGraph));
-  graph->vertexCount= vertexCount;
+  graph->vertexCount = 0;
   graph->adjacency = createMatrix(vertexCount);
 
   for (int i = 0; i < vertexCount; i++) {
@@ -88,24 +60,6 @@ MatrixGraph* createMatrixGraph(int vertexCount) {
     }
   }
   return graph;
-}
-
-Element* createElement(
-  char name[100],
-  int age,
-  char city[100],
-  char favoriteMovie[100],
-  char team[100],
-  char favoriteColor[100]
-){
-  Element* element = (Element*) malloc(sizeof(Element));
-  strcpy(element->name, name);
-  element->age = age;
-  strcpy(element->city, city);
-  strcpy(element->favoriteMovie, favoriteMovie);
-  strcpy(element->team, team);
-  strcpy(element->favoriteColor, favoriteColor);
-  return element;
 }
 
 
@@ -137,8 +91,9 @@ void addToList(List* list, ListNode* listNode) {
 
 List* findElementInAdjacency(List* adjacency[MAX_VERTEX_COUNT], Element* element) {
   int i;
-  for (i = 0; i < nameMapCount; i++) {
+  for (i = 0; i < MAX_VERTEX_COUNT; i++) {
     List* list = adjacency[i];
+    if (!list) continue;
     if (list->head) {
       if (compareElements(list->head->element, element)) return list;
     }
@@ -155,11 +110,11 @@ ListNode* findElementInList(List* list, Element* element) {
   return NULL;
 }
 
-void addListGraphNode(ListGraph* graph, Element* element) {
-  if (findEdgePositionByElement(element) != -1) return;
-  nameMap[nameMapCount] = element;
-  addToList(graph->adjacency[nameMapCount], createListNode(element));
-  nameMapCount++;
+void addGraphNode(ListGraph* graph, MatrixGraph* matrixGraph, Element* element) {
+  if (findNodePositionByElement(matrixGraph, element) != -1) return;
+  matrixGraph->nodes[matrixGraph->vertexCount] = element;
+  addToList(graph->adjacency[matrixGraph->vertexCount], createListNode(element));
+  matrixGraph->vertexCount++;
 }
 
 void addListGraphEdge(ListGraph* graph, Element* source, Element* destination) {
@@ -172,8 +127,8 @@ void addListGraphEdge(ListGraph* graph, Element* source, Element* destination) {
 }
 
 void addMatrixGraphEdge(MatrixGraph* graph, Element* source, Element* destination, int weight) {
-  int sourcePosition = findEdgePositionByElement(source);
-  int destinationPosition = findEdgePositionByElement(destination);
+  int sourcePosition = findNodePositionByElement(graph, source);
+  int destinationPosition = findNodePositionByElement(graph, destination);
   if (
     graph->vertexCount== 0 ||
     sourcePosition == -1 ||
@@ -183,16 +138,16 @@ void addMatrixGraphEdge(MatrixGraph* graph, Element* source, Element* destinatio
   graph->adjacency[destinationPosition][sourcePosition] = weight;
 }
 
-void printElementNames() {
+void printElementNames(MatrixGraph* graph) {
   int i;
-  for (i = 0; i < nameMapCount; i++) {
-    printf("%s \n", nameMap[i]->name);
+  for (i = 0; i < graph->vertexCount; i++) {
+    printf("%s \n", graph->nodes[i]->name);
   }
 }
 
 int findMatrixGraphEdge(MatrixGraph* graph, Element* source, Element* destination) {
-  int sourcePosition = findEdgePositionByElement(source);
-  int destinationPosition = findEdgePositionByElement(destination);
+  int sourcePosition = findNodePositionByElement(graph, source);
+  int destinationPosition = findNodePositionByElement(graph, destination);
   if (
     graph->vertexCount== 0 ||
     sourcePosition == -1 ||
@@ -203,7 +158,6 @@ int findMatrixGraphEdge(MatrixGraph* graph, Element* source, Element* destinatio
 
 int findListGraphEdge(ListGraph* graph, Element* source, Element* destination) {
   List* list = findElementInAdjacency(graph->adjacency, source);
-  int result = (int) findElementInList(list, destination);
-  if (result) return 1;
+  if (findElementInList(list, destination)) return 1;
   return 0;
 }
