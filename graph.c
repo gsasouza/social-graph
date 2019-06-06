@@ -3,16 +3,6 @@
 #include <stdlib.h>
 #include "graph.h"
 
-typedef struct listNode {
-  Element* element;
-  struct listNode* next;
-} ListNode;
-
-typedef struct list {
-  ListNode* head;
-  ListNode* tail;
-} List;
-
 struct listGraph {
   int vertexCount;
   List* adjacency[MAX_VERTEX_COUNT];
@@ -25,13 +15,6 @@ int** createMatrix(int size) {
   }
   return matrix;
 };
-
-List* createList(int size) {
-  List* l = (List*) malloc(sizeof(List) * size);
-  l->head = NULL;
-  l->tail = NULL;
-  return l;
-}
 
 void createAdjacencyList(ListGraph* graph, int size) {
   int i;
@@ -62,7 +45,6 @@ MatrixGraph* createMatrixGraph(int vertexCount) {
   return graph;
 }
 
-
 ListGraph* createListGraph(int vertexCount) {
   ListGraph* graph = (ListGraph*) malloc(sizeof(ListGraph));
   graph->vertexCount = vertexCount;
@@ -77,18 +59,6 @@ ListNode* createListNode(Element* element) {
   return listNode;
 }
 
-void addToList(List* list, ListNode* listNode) {
-  ListNode* current = list->head;
-  if (!current) {
-    list->head = listNode;
-    list->tail = listNode;
-    return;
-  }
-  while(current->next) current = current->next;
-  current->next = listNode;
-  list->tail = listNode;
-}
-
 List* findElementInAdjacency(List* adjacency[MAX_VERTEX_COUNT], Element* element) {
   int i;
   for (i = 0; i < MAX_VERTEX_COUNT; i++) {
@@ -97,15 +67,6 @@ List* findElementInAdjacency(List* adjacency[MAX_VERTEX_COUNT], Element* element
     if (list->head) {
       if (compareElements(list->head->element, element)) return list;
     }
-  }
-  return NULL;
-}
-
-ListNode* findElementInList(List* list, Element* element) {
-  ListNode* current = list->head;
-  while(current) {
-    if (compareElements(element, current->element)) return current;
-    current = current->next;
   }
   return NULL;
 }
@@ -136,13 +97,6 @@ void addMatrixGraphEdge(MatrixGraph* graph, Element* source, Element* destinatio
   ) return;
   graph->adjacency[sourcePosition][destinationPosition] = weight;
   graph->adjacency[destinationPosition][sourcePosition] = weight;
-}
-
-void printElementNames(MatrixGraph* graph) {
-  int i;
-  for (i = 0; i < graph->vertexCount; i++) {
-    printf("%s \n", graph->nodes[i]->name);
-  }
 }
 
 int findMatrixGraphEdge(MatrixGraph* graph, Element* source, Element* destination) {
