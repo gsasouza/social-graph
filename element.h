@@ -10,9 +10,10 @@
     char favoriteColor[100];
     char favoriteMovie[100];
     char favoriteGame[100];
+    char gender[11];
     List* invites;
   } Element;
   int compareElements(Element*, Element*);
-  Element* createElement(char[100], int, char[100], char[100], char[100], char[100], char[100], char[100]);
+  Element* createElement(char[100], int, char[100], char[100], char[100], char[100], char[100], char[100], char[11]);
   int getElementsSimilarity(Element*, Element*);
 #endif

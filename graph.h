@@ -1,6 +1,6 @@
 #include "element.h"
 #include "list.h"
-#define MAX_VERTEX_COUNT 100
+#define MAX_VERTEX_COUNT 920
 
 #ifndef GRAPH_H
 #define GRAPH_H
@@ -22,6 +22,7 @@
   void addMatrixGraphEdge(MatrixGraph*, Element*, Element*, int);
   int findMatrixGraphEdge(MatrixGraph*, Element*, Element*);
   int findListGraphEdge(ListGraph*, Element*, Element*);
-  void freeGraphMemory(MatrixGraph*, ListGraph*);
+  void freeGraphMemory(MatrixGraph*, ListGraph*
+  );
 
 #endif

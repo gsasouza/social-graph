@@ -35,10 +35,9 @@ size_t removeProperty(char *str, size_t n) {
 
 void createUsers (MatrixGraph* matrixGraph, ListGraph* listGraph) {
   FILE* file = fopen("users.in", "r"); // read mode;
-  char* line[9] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-  size_t propertySizes[9] = {17, 7, 8, 8, 24, 15, 18, 16};
+  char* line[10] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+  size_t propertySizes[10] = { 18, 7, 8, 8, 22, 15, 17, 16, 9 };
   size_t len = 0;
-  ssize_t read;
   size_t i;
   int count = 0;
   if (file == NULL) exit(EXIT_FAILURE);
@@ -46,18 +45,18 @@ void createUsers (MatrixGraph* matrixGraph, ListGraph* listGraph) {
   while ((getline(&line[count], &len, file)) != -1){
     if(!strcmp(line[count], "\n")) {
       count = -1;
-      for (i = 0; i < 8; i ++) {
+      for (i = 0; i < 9; i ++) {
         removeProperty(line[i], propertySizes[i]);
       }
       addGraphNode(
         listGraph,
         matrixGraph,
-        createElement(line[0], (int) line[1], line[2], line[3], line[4], line[5], line[6], line[7])
+        createElement(line[0],(int) strtol(line[1], (char **)NULL, 10) , line[2], line[3], line[4], line[5], line[6], line[7], line[8])
       );
     }
     count++;
   }
-  for (i = 0; i < 9; i ++) {
+  for (i = 0; i < 10; i ++) {
     free(line[i]);
   }
   fclose(file);
@@ -90,7 +89,7 @@ void waitForUser() {
   getchar();
 }
 
-void printUsersOrderedByAffinity(ListGraph* listGraph, MatrixGraph* matrixGraph, int* selectedUser){
+void printUsersOrderedByAffinity(MatrixGraph* matrixGraph, int* selectedUser){
   int* row = matrixGraph->adjacency[(*selectedUser)];
   int i;
   MergeSortElement array[matrixGraph->vertexCount];
@@ -99,7 +98,7 @@ void printUsersOrderedByAffinity(ListGraph* listGraph, MatrixGraph* matrixGraph,
   }
   mergesort(array, matrixGraph->vertexCount);
   for(i = 0; i < matrixGraph->vertexCount; i++){
-    if (i == *selectedUser) continue;
+    if (compareElements(matrixGraph->nodes[(*selectedUser)], array[i].element)) continue;
     printf("%d -%s (Afinidade: %d%%) \n", i, array[i].element->name, array[i].affinity * 100 / 6);
   }
 }
@@ -216,8 +215,39 @@ void sendInvite(ListGraph* listGraph, MatrixGraph* matrixGraph, int* selectedUse
   );
 }
 
+void findTrueLove(MatrixGraph* matrixGraph, int* selectedUser) {
+  int* row = matrixGraph->adjacency[(*selectedUser)];
+  int i, option = 0, count = 0;
+  MergeSortElement* array = malloc(sizeof(MergeSortElement) * matrixGraph->vertexCount);
+  printf("Escolha o Gênero:\n1.Masculino\n2.Feminino");
+  scanf("%d",&option);
 
-
+  if(option == 1) {
+    for(i = 0; i < matrixGraph->vertexCount; i++) {
+      if (!strcmp(matrixGraph->nodes[i]->gender, "Masculino")) {
+        array[count] = *createMergeSortElement(matrixGraph->nodes[i], row[i]);
+        count++;
+      }
+    }
+  }
+  else {
+    for(i = 0; i < matrixGraph->vertexCount; i++) {
+      if (!strcmp(matrixGraph->nodes[i]->gender, "Feminino")) {
+        array[count] = *createMergeSortElement(matrixGraph->nodes[i], row[i]);
+        count++;
+      }
+    }
+  }
+  mergesort(array, matrixGraph->vertexCount);
+  Element* trueLove = array[0].element;
+  if (!trueLove) {
+    printf("Não foi possível encontrar seu amor verdadeiro dessa vez :(\n");
+  } else if (compareElements(trueLove, matrixGraph->nodes[(*selectedUser)])) {
+    printf("Não foi possível encontrar seu amor verdadeiro dessa vez :(\n");
+  } else {
+    printf("Seu Amor Verdadeiro é: %s (Afinidade: %d%%) \n", trueLove->name, array[0].affinity * 100 / 6);
+  }
+}
 void menu(MatrixGraph* matrixGraph, ListGraph* listGraph) {
   int option = 0, selectedUser = 0;
   while(option >= 0 && option < 9){
@@ -253,10 +283,17 @@ void menu(MatrixGraph* matrixGraph, ListGraph* listGraph) {
       }
       case 3: {
         sendInvite(listGraph, matrixGraph, &selectedUser);
+        waitForUser();
         break;
       }
       case 4: {
-        printUsersOrderedByAffinity(listGraph, matrixGraph, &selectedUser);
+        printUsersOrderedByAffinity(matrixGraph, &selectedUser);
+        waitForUser();
+        break;
+      }
+      case 5: {
+        findTrueLove(matrixGraph, &selectedUser);
+        waitForUser();
         break;
       }
       case 7: {
@@ -279,11 +316,11 @@ void menu(MatrixGraph* matrixGraph, ListGraph* listGraph) {
 
 //@TODO test invite/accept/refuse friend flow
 int main() {
-  MatrixGraph* matrixGraph = createMatrixGraph(20);
-  ListGraph* listGraph = createListGraph(20);
+  MatrixGraph* matrixGraph = createMatrixGraph(920);
+  ListGraph* listGraph = createListGraph(920);
   createUsers(matrixGraph, listGraph);
   createSimilarityMatrix(matrixGraph);
-//  printMatrix(matrixGraph);
+  printMatrix(matrixGraph);
   menu(matrixGraph, listGraph);
   freeGraphMemory(matrixGraph, listGraph);
   return 0;

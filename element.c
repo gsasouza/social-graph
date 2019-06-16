@@ -26,9 +26,10 @@ Element* createElement(
   char city[100],
   char state[100],
   char company[100],
-  char favoriteMovie[100],
   char favoriteColor[100],
-  char favoriteGame[100]
+  char favoriteMovie[100],
+  char favoriteGame[100],
+  char gender[11]
 ){
   Element* element = (Element*) malloc(sizeof(Element));
   strcpy(element->name, name);
@@ -39,6 +40,7 @@ Element* createElement(
   strcpy(element->favoriteMovie, favoriteMovie);
   strcpy(element->favoriteGame, favoriteGame);
   strcpy(element->favoriteColor, favoriteColor);
+  strcpy(element->gender, gender);
   element->invites = (List*) malloc(sizeof(List));
   return element;
 }
