@@ -5,12 +5,14 @@
     char name[100];
     int age;
     char city[100];
-    char favoriteMovie[100];
-    char team[100];
+    char state[100];
+    char company[100];
     char favoriteColor[100];
+    char favoriteMovie[100];
+    char favoriteGame[100];
     List* invites;
   } Element;
   int compareElements(Element*, Element*);
-  Element* createElement(char[100], int, char[100], char[100], char[100], char[100]);
+  Element* createElement(char[100], int, char[100], char[100], char[100], char[100], char[100], char[100]);
   int getElementsSimilarity(Element*, Element*);
 #endif

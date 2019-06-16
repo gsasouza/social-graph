@@ -22,5 +22,6 @@
   void addMatrixGraphEdge(MatrixGraph*, Element*, Element*, int);
   int findMatrixGraphEdge(MatrixGraph*, Element*, Element*);
   int findListGraphEdge(ListGraph*, Element*, Element*);
+  void freeGraphMemory(MatrixGraph*, ListGraph*);
 
 #endif

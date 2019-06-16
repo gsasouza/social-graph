@@ -103,3 +103,21 @@ int findListGraphEdge(ListGraph* graph, Element* source, Element* destination) {
   if (findElementInList(list, destination)) return 1;
   return 0;
 }
+
+void freeGraphMemory(MatrixGraph* matrixGraph, ListGraph* listGraph) {
+  ListNode *aux;
+  int i;
+  for (i=0; i < listGraph->vertexCount; i++) {
+    while (listGraph->adjacency[i]->head != NULL) {
+      aux = listGraph->adjacency[i]->head;
+      listGraph->adjacency[i]->head = listGraph->adjacency[i]->head->next;
+      free(aux);
+    }
+  }
+  free(listGraph);
+  for (i=0; i < matrixGraph->vertexCount; i++) {
+    free(matrixGraph->nodes[i]);
+  }
+  free(matrixGraph->adjacency);
+  free(matrixGraph);
+}

@@ -4,6 +4,66 @@
 #include "graph.h"
 #include "element.h"
 
+void printSeparator() {
+  printf("<------------------------------------------------------------------------>\n");
+}
+
+void printLogo() {
+  printf("   _____            _       __   ______                 __  \n");
+  printf("  / ___/____  _____(_)___ _/ /  / ____/________ _____  / /_ \n");
+  printf("  \\__ \\/ __ \\/ ___/ / __ `/ /  / / __/ ___/ __ `/ __ \\/ __ \\\n");
+  printf(" ___/ / /_/ / /__/ / /_/ / /  / /_/ / /  / /_/ / /_/ / / / /\n");
+  printf("/____/\\____/\\___/_/\\__,_/_/   \\____/_/   \\__,_/ .___/_/ /_/ \n");
+  printf("                                             /_/            \n");
+}
+
+void removeBreakLine(char* str) {
+  size_t len = strlen(str);
+  if(str[len-1] == '\n' )
+    str[len-1] = 0;
+}
+
+size_t removeProperty(char *str, size_t n) {
+  size_t len = strlen(str);
+  if (n > len)
+    n = len;
+  memmove(str, str + n, len - n + 1);
+  removeBreakLine(str);
+  return(len - n);
+}
+
+void createUsers (MatrixGraph* matrixGraph, ListGraph* listGraph) {
+  FILE* file = fopen("users.in", "r"); // read mode;
+  char* line[9] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+  size_t propertySizes[9] = {17, 7, 8, 8, 24, 15, 18, 16};
+  size_t len = 0;
+  ssize_t read;
+  size_t i;
+  int count = 0;
+  if (file == NULL) exit(EXIT_FAILURE);
+
+  while ((read = getline(&line[count], &len, file)) != -1){
+    printf("Retrieved line of length %zu:\n", read);
+    printf("%s", line[count]);
+    if(!strcmp(line[count], "\n")) {
+      count = -1;
+      for (i = 0; i < 8; i ++) {
+        removeProperty(line[i], propertySizes[i]);
+      }
+      addGraphNode(
+        listGraph,
+        matrixGraph,
+        createElement(line[0], (int) line[1], line[2], line[3], line[4], line[5], line[6], line[7])
+      );
+    }
+    count++;
+  }
+  for (i = 0; i < 9; i ++) {
+    free(line[i]);
+  }
+  fclose(file);
+}
+
 void createSimilarityMatrix(MatrixGraph* matrixGraph) {
   int i = 0, j = 0;
   for (i = 0; i < matrixGraph->vertexCount; i++) {
@@ -14,12 +74,6 @@ void createSimilarityMatrix(MatrixGraph* matrixGraph) {
       if (!compareElements(source, match)) matrixGraph->adjacency[i][j] = getElementsSimilarity(source, match);
     }
   }
-}
-
-void createElements(MatrixGraph* matrixGraph, ListGraph* listGraph) {
-  addGraphNode(listGraph, matrixGraph, createElement("beltrano", 19, "São Carlos", "vingadores", "palmeiras", "azul"));
-  addGraphNode(listGraph, matrixGraph, createElement("ciclano", 21, "São Carlos", "prometheus", "são caetano", "branco"));
-  addGraphNode(listGraph, matrixGraph, createElement("grafano", 32, "São Carlos", "prometheus", "são caetano", "branco"));
 }
 
 void printMatrix(MatrixGraph* matrixGraph) {
@@ -33,7 +87,7 @@ void printMatrix(MatrixGraph* matrixGraph) {
 void printUsers(MatrixGraph* graph) {
   int i;
   for (i = 0; i < graph->vertexCount; i++) {
-    printf("%d - %s \n", i, graph->nodes[i]->name);
+    printf("%d - %s", i, graph->nodes[i]->name);
   }
 }
 
@@ -41,7 +95,7 @@ void printUsersWithSimilarity(MatrixGraph* graph, int* selectedUser) {
   int i;
   for (i = 0; i < graph->vertexCount; i++) {
     if (i == *selectedUser) continue;
-    printf("%d - %s (Afinidade: %d%%) \n", i, graph->nodes[i]->name, graph->adjacency[*selectedUser][i] * 100 / 6);
+    printf("%d -%s (Afinidade: %d%%) \n", i, graph->nodes[i]->name, graph->adjacency[*selectedUser][i] * 100 / 6);
   }
 }
 
@@ -50,9 +104,7 @@ void printSelectedElement(MatrixGraph* graph, int selectedUser) {
   printf("Usuário Selecionado: %d - %s \n", selectedUser, user->name);
 }
 
-void printSeparator() {
-  printf("-----------------------------------\n");
-}
+
 
 void selectUser(MatrixGraph* matrixGraph, int* selectedUser) {
   while(1){
@@ -106,6 +158,8 @@ void manageInvite(ListGraph* listGraph, int* selectedUser, int* count) {
     if (*count == j) break;
     j++;
   }
+  // @TODO add refuse invite
+
   addListGraphEdge(listGraph, user->element, invite->element);
   removeElementFromList(invites, invite->element);
 }
@@ -151,49 +205,52 @@ void sendInvite(ListGraph* listGraph, MatrixGraph* matrixGraph, int* selectedUse
   );
 }
 
+
+
 void menu(MatrixGraph* matrixGraph, ListGraph* listGraph) {
   int option = 0, selectedUser = 0;
-  while(option >= 0 && option < 7){
+  while(option >= 0 && option < 9){
     setbuf(stdout, 0);
+    printSeparator();
+    printLogo();
     printSeparator();
     printSelectedElement(matrixGraph, selectedUser);
     printSeparator();
     printf("***OPCOES***\n");
-    printf("1. Listar Usuários Cadastrados\n");
-    printf("2. Trocar de Usuário\n");
-    printf("3. Meus Amigos\n");
-    printf("4. Meus Convites de Amizade\n");
-    printf("5. Enviar Convite de Amizade\n");
-    printf("6. Lista de Sugestões\n");
-    printf("7. Buscar Amor Verdadeiro\n");
-    printf("8. Amigos com pouca afinidade\n");
+    printf("1. Meus Amigos\n");
+    printf("2. Meus Convites de Amizade\n");
+    printf("3. Enviar Convite de Amizade\n");
+    printf("4. Lista de Sugestões\n");
+    printf("5. Buscar Amor Verdadeiro\n");
+    printf("6. Amigos com Pouca afinidade\n");
+    printf("7. Listar Usuários Cadastrados\n");
+    printf("8. Trocar de Usuário\n");
     printf("9. Sair\n");
     printf("Sua opcao: ");
     scanf("%d",&option);
     printSeparator();
     switch(option) {
       case 1: {
-        printUsers(matrixGraph);
-        waitForUser();
-        break;
-      }
-      case 2: {
-        selectUser(matrixGraph, &selectedUser);
-        break;
-      }
-      case 3: {
         printUserFriends(listGraph, &selectedUser);
         waitForUser();
         break;
       }
-      case 4: {
+      case 2: {
         printUserInvites(listGraph, matrixGraph, &selectedUser);
         waitForUser();
         break;
       }
-      case 5: {
+      case 3: {
         sendInvite(listGraph, matrixGraph, &selectedUser);
-//        waitForUser();
+        break;
+      }
+      case 7: {
+        printUsers(matrixGraph);
+        waitForUser();
+        break;
+      }
+      case 8: {
+        selectUser(matrixGraph, &selectedUser);
         break;
       }
       case 9: return;
@@ -209,8 +266,10 @@ void menu(MatrixGraph* matrixGraph, ListGraph* listGraph) {
 int main() {
   MatrixGraph* matrixGraph = createMatrixGraph(20);
   ListGraph* listGraph = createListGraph(20);
-  createElements(matrixGraph, listGraph);
+  createUsers(matrixGraph, listGraph);
   createSimilarityMatrix(matrixGraph);
+  printMatrix(matrixGraph);
   menu(matrixGraph, listGraph);
+  freeGraphMemory(matrixGraph, listGraph);
   return 0;
 }
