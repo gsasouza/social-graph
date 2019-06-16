@@ -97,9 +97,9 @@ void printUsersOrderedByAffinity(MatrixGraph* matrixGraph, int* selectedUser){
     array[i] = *createMergeSortElement(matrixGraph->nodes[i], row[i]);
   }
   mergesort(array, matrixGraph->vertexCount);
-  for(i = 0; i < matrixGraph->vertexCount; i++){
+  for(i = 0; i < 10; i++){
     if (compareElements(matrixGraph->nodes[(*selectedUser)], array[i].element)) continue;
-    printf("%d -%s (Afinidade: %d%%) \n", i, array[i].element->name, array[i].affinity * 100 / 6);
+    printf("%d - %s (Afinidade: %d%%) \n", i, array[i].element->name, array[i].affinity * 100 / 6);
   }
 }
 
@@ -315,12 +315,16 @@ void menu(MatrixGraph* matrixGraph, ListGraph* listGraph) {
 }
 
 //@TODO test invite/accept/refuse friend flow
+//@TODO remove friends from sugestion list
+//@TODO add low affinity friends feature
+
+
 int main() {
   MatrixGraph* matrixGraph = createMatrixGraph(920);
   ListGraph* listGraph = createListGraph(920);
   createUsers(matrixGraph, listGraph);
   createSimilarityMatrix(matrixGraph);
-  printMatrix(matrixGraph);
+//  printMatrix(matrixGraph);
   menu(matrixGraph, listGraph);
   freeGraphMemory(matrixGraph, listGraph);
   return 0;
