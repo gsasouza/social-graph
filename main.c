@@ -101,6 +101,7 @@ void printUsersOrderedByAffinity(MatrixGraph* matrixGraph, int* selectedUser){
     if (compareElements(matrixGraph->nodes[(*selectedUser)], array[i].element)) continue;
     printf("%d - %s (Afinidade: %d%%) \n", i, array[i].element->name, array[i].affinity * 100 / 8);
   }
+  free(array);
 }
 
 void printUsers(MatrixGraph* graph) {
@@ -245,6 +246,7 @@ void findTrueLove(MatrixGraph* matrixGraph, int* selectedUser) {
   } else {
     printf("Seu Amor Verdadeiro é: %s (Afinidade: %d%%) \n", trueLove->name, array[0].affinity * 100 / 8);
   }
+  free(array);
 }
 
 void printWorstFriends(MatrixGraph* matrixGraph, ListGraph* listGraph, int* selectedUser) {
@@ -263,6 +265,7 @@ void printWorstFriends(MatrixGraph* matrixGraph, ListGraph* listGraph, int* sele
   for(i = 0; i < count; i++) {
     printf("- %s (Afinidade: %d%%) \n", array[i].element->name, findMatrixGraphEdge(matrixGraph, array[i].element, user->element) * 100 / 8);
   }
+  free(array);
 }
 
 void menu(MatrixGraph* matrixGraph, ListGraph* listGraph) {
