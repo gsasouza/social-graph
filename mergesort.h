@@ -6,6 +6,6 @@
     int affinity;
   } MergeSortElement;
 
-  void mergesort(MergeSortElement *v, int n);
+  void mergesort(MergeSortElement *v, int n, int decreasing);
   MergeSortElement* createMergeSortElement(Element* element, int affinity);
 #endif

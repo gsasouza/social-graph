@@ -96,17 +96,17 @@ void printUsersOrderedByAffinity(MatrixGraph* matrixGraph, int* selectedUser){
   for(i = 0; i < matrixGraph->vertexCount; i++){
     array[i] = *createMergeSortElement(matrixGraph->nodes[i], row[i]);
   }
-  mergesort(array, matrixGraph->vertexCount);
+  mergesort(array, matrixGraph->vertexCount, 0);
   for(i = 0; i < 10; i++){
     if (compareElements(matrixGraph->nodes[(*selectedUser)], array[i].element)) continue;
-    printf("%d - %s (Afinidade: %d%%) \n", i, array[i].element->name, array[i].affinity * 100 / 6);
+    printf("%d - %s (Afinidade: %d%%) \n", i, array[i].element->name, array[i].affinity * 100 / 8);
   }
 }
 
 void printUsers(MatrixGraph* graph) {
   int i;
   for (i = 0; i < graph->vertexCount; i++) {
-    printf("%d - %s", i, graph->nodes[i]->name);
+    printf("%d - %s\n", i, graph->nodes[i]->name);
   }
 }
 
@@ -114,7 +114,7 @@ void printUsersWithSimilarity(MatrixGraph* graph, int* selectedUser) {
   int i;
   for (i = 0; i < graph->vertexCount; i++) {
     if (i == *selectedUser) continue;
-    printf("%d -%s (Afinidade: %d%%) \n", i, graph->nodes[i]->name, graph->adjacency[*selectedUser][i] * 100 / 6);
+    printf("%d -%s (Afinidade: %d%%) \n", i, graph->nodes[i]->name, graph->adjacency[*selectedUser][i] * 100 / 8);
   }
 }
 
@@ -168,8 +168,6 @@ void manageInvite(ListGraph* listGraph, int* selectedUser, int* count) {
     if (*count == j) break;
     j++;
   }
-  // @TODO add refuse invite
-
   addListGraphEdge(listGraph, user->element, invite->element);
   removeElementFromList(invites, invite->element);
 }
@@ -238,16 +236,35 @@ void findTrueLove(MatrixGraph* matrixGraph, int* selectedUser) {
       }
     }
   }
-  mergesort(array, matrixGraph->vertexCount);
+  mergesort(array, matrixGraph->vertexCount, 0);
   Element* trueLove = array[0].element;
   if (!trueLove) {
     printf("Não foi possível encontrar seu amor verdadeiro dessa vez :(\n");
   } else if (compareElements(trueLove, matrixGraph->nodes[(*selectedUser)])) {
     printf("Não foi possível encontrar seu amor verdadeiro dessa vez :(\n");
   } else {
-    printf("Seu Amor Verdadeiro é: %s (Afinidade: %d%%) \n", trueLove->name, array[0].affinity * 100 / 6);
+    printf("Seu Amor Verdadeiro é: %s (Afinidade: %d%%) \n", trueLove->name, array[0].affinity * 100 / 8);
   }
 }
+
+void printWorstFriends(MatrixGraph* matrixGraph, ListGraph* listGraph, int* selectedUser) {
+  ListNode* user = listGraph->adjacency[(*selectedUser)]->head;
+  ListNode* friend = user->next;
+  MergeSortElement* array = malloc(sizeof(MergeSortElement));
+  int count = 0, i;
+  while (friend) {
+    array = realloc(array, sizeof(MergeSortElement));
+    array[count] = *createMergeSortElement(friend->element, findMatrixGraphEdge(matrixGraph, friend->element, user->element));
+    friend = friend->next;
+    count++;
+  }
+  mergesort(array, count, 1);
+
+  for(i = 0; i < count; i++) {
+    printf("- %s (Afinidade: %d%%) \n", array[i].element->name, findMatrixGraphEdge(matrixGraph, array[i].element, user->element) * 100 / 8);
+  }
+}
+
 void menu(MatrixGraph* matrixGraph, ListGraph* listGraph) {
   int option = 0, selectedUser = 0;
   while(option >= 0 && option < 9){
@@ -296,6 +313,11 @@ void menu(MatrixGraph* matrixGraph, ListGraph* listGraph) {
         waitForUser();
         break;
       }
+      case 6: {
+        printWorstFriends(matrixGraph, listGraph, &selectedUser);
+        waitForUser();
+        break;
+      }
       case 7: {
         printUsers(matrixGraph);
         waitForUser();
@@ -308,16 +330,12 @@ void menu(MatrixGraph* matrixGraph, ListGraph* listGraph) {
       case 9: return;
       default:
         printf("Opção Inválida \n");
+        waitForUser();
         continue;
     }
 
   }
 }
-
-//@TODO test invite/accept/refuse friend flow
-//@TODO remove friends from sugestion list
-//@TODO add low affinity friends feature
-
 
 int main() {
   MatrixGraph* matrixGraph = createMatrixGraph(920);
